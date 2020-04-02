@@ -18,18 +18,18 @@ echo "#   Welcome to the upgrade script for PACGlobal masternodes  #"
 echo "##############################################################"
 echo ""
 echo "This script is to be ONLY used if the pacglobal-mn.sh script was used to install the PAC masternode version 0.14.x or newer and the masternode is still installed!"
-echo ""
+echo "Running this script on Ubuntu 18.04 LTS or newer is highly recommended."
+echo "Make sure you have enough memory and swap configured - their combined value should be at least 7 GB. Use the command 'free -h' to check the values (under 'Total')."
 if [ -e /root/PACGlobal/pacglobald ]; then
             sleep 1
 	else
-	    read -p "No files in /root/PACGlobal detected. Are you sure you want to continue [y/n]?" cont
+	    echo ""
+		read -p "No files in /root/PACGlobal detected. Are you sure you want to continue [y/n]?" cont
 	    if [ $cont = 'n' ] || [ $cont = 'no' ] || [ $cont = 'N' ] || [ $cont = 'No' ]; then
 		exit
             fi
 fi
-sleep 3
-echo ""
-echo "Running this script on Ubuntu 18.04 LTS or newer is highly recommended."
+sleep 10
 echo ""
 echo "###################################"
 echo "#  Updating the operating system  #"
@@ -42,6 +42,9 @@ sudo apt-get -y upgrade
 
 echo ""
 echo "Stopping the pacg service"
+set +e
+~/PACGlobal/pacglobal-cli stop
+set -e
 systemctl stop pacg.service || true
 echo "The pacg service stopped"
 sleep 3
@@ -57,30 +60,29 @@ set +e
 wget $binary_url
 set -e
 if test -e "$file_name$extension"; then
-echo ""
-echo "Unpacking PACGlobal distribution"
-sleep 3
-	tar -xzvf $file_name$extension
-	rm -r $file_name$extension
-	rm -r -f PACGlobal
-	mv -v $file_name PACGlobal
-	cd PACGlobal
-	chmod +x pacglobald
-	chmod +x pacglobal-cli
-	echo "Binaries were saved to: /root/PACGlobal"
-else
-	echo ""
-	echo "There was a problem downloading the binaries, please try running the script again."
-	echo "Most likely are the parameters used to run the script wrong."
-	echo "Please check PAC FAQ on the PAC Global website for further information or help!"
-	echo ""
-	exit -1
+		echo ""
+		echo "Unpacking PACGlobal distribution"
+		sleep 3
+		tar -xzvf $file_name$extension
+		rm -r $file_name$extension
+		rm -r -f PACGlobal
+		mv -v $file_name PACGlobal
+		cd PACGlobal
+		chmod +x pacglobald
+		chmod +x pacglobal-cli
+		echo "Binaries were saved to: /root/PACGlobal"
+	else
+		echo ""
+		echo "There was a problem downloading the binaries, please try running the script again."
+		echo "Most likely are the parameters used to run the script wrong."
+		echo "Please check PAC FAQ on the PAC Global website for further information or help!"
+		echo ""
+		exit -1
 fi
 echo ""
 echo "Starting the pacg service"
 systemctl start pacg.service
 echo "The pacg service started"
-
 echo ""
 echo "###############################"
 echo "#      Running the wallet     #"
@@ -105,6 +107,7 @@ echo "Your masternode / hot wallet binaries have been upgraded!"
 echo ""
 echo "Please execute following commands to check the status of your masternode:"
 echo "~/PACGlobal/pacglobal-cli -version"
+echo "~/PACGlobal/pacglobal-cli getblockcount"
 echo "~/PACGlobal/pacglobal-cli masternode status"
 echo "~/PACGlobal/pacglobal-cli mnsync status"
 echo ""
