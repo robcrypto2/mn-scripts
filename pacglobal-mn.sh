@@ -26,6 +26,10 @@ echo "#################################################"
 echo "#   Welcome to the PACGlobal Masternode Setup   #"
 echo "#################################################"
 echo ""
+echo "Running this script as root on Ubuntu 18.04 LTS or newer is highly recommended."
+echo "Please note that this script will try to configure 6 GB of swap - the combined value of memory and swap should be at least 7 GB. Use the command 'free -h' to check the values (under 'Total')." 
+echo ""
+sleep 10
 ipaddr="$(dig +short myip.opendns.com @resolver1.opendns.com)"
 while [[ $ipaddr = '' ]] || [[ $ipaddr = ' ' ]]; do
 	read -p 'Unable to find an external IP, please provide one: ' ipaddr
@@ -40,8 +44,6 @@ echo ""
 echo "###############################################################"
 echo "#  Installing dependencies / Updating the operating system    #"
 echo "###############################################################"
-echo ""
-echo "Running this script as root on Ubuntu 18.04 LTS or newer is highly recommended."
 echo ""
 sleep 2
 sudo apt-get -y update
@@ -62,7 +64,7 @@ sudo ufw logging on
 sudo ufw --force enable
 sudo ufw status
 sudo iptables -A INPUT -p tcp --dport 7112 -j ACCEPT
-
+echo ""
 echo "Proceed with the setup of the swap file [y/n]?"
 echo "(Defaults to 'y' in 5 seconds)"
 set +e
@@ -78,17 +80,17 @@ if [ $cont = 'y' ] || [ $cont = 'yes' ] || [ $cont = 'Y' ] || [ $cont = 'Yes' ];
 		echo "###########################"
 		echo ""
 		sudo swapoff -a
-		sudo fallocate -l 4G /swapfile
+		sudo fallocate -l 6G /swapfile
 		sudo chmod 600 /swapfile
 		sudo mkswap /swapfile
 		sudo swapon /swapfile
 		echo "/swapfile swap swap defaults 0 0" >> /etc/fstab
 		sleep 2
     else
-        echo "Warning: Swap was not setup as desired. Use free -h command to check how much memory / swap is available."
+        echo ""
+		echo "Warning: Swap was not setup as desired. Use free -h command to check how much memory / swap is available."
 		sleep 5
 fi
-
 echo ""
 echo "###############################"
 echo "#      Get/Setup binaries     #"
@@ -110,6 +112,7 @@ systemctl stop pacg.service || true
 	chmod +x pacglobald
 	chmod +x pacglobal-cli
 	echo "Binaries were saved to: /root/PACGlobal"
+	echo ""
 else
 	echo ""
 	echo "There was a problem downloading the binaries, please try running the script again."
@@ -118,12 +121,11 @@ else
 	echo ""
 	exit -1
 fi
-echo ""
 echo "#################################"
 echo "#     Configuring the wallet    #"
 echo "#################################"
 echo ""
-echo "A .PACGlobal folder will be created. If it already exists, it will be replaced."
+echo "A .PACGlobal folder will be created, unless it already exists."
 sleep 3
 if [ -d ~/.PACGlobal ]; then
 	if [ -e ~/.PACGlobal/pacglobal.conf ]; then
@@ -140,11 +142,11 @@ else
 	cd ~/.PACGlobal
 	touch pacglobal.conf
 fi
-#The three commands below should not be needed!
-set +e
-wget -q https://github.com/PACGlobalOfficial/mn-scripts/blob/master/peers.dat?raw=true
-mv peers.dat?raw=true peers.dat
-set -e
+#The four commands below should not be needed!
+#set +e
+#wget -q https://github.com/PACGlobalOfficial/mn-scripts/blob/master/peers.dat?raw=true
+#mv peers.dat?raw=true peers.dat
+#set -e
 
 echo "Configuring the pacglobal.conf"
 echo "#----" > pacglobal.conf
@@ -181,9 +183,10 @@ ExecStart=/root/PACGlobal/pacglobald -daemon -pid=/root/.PACGlobal/pacglobal.pid
 ExecStop=-/root/PACGlobal/pacglobal-cli -conf=/root/.PACGlobal/pacglobal.conf \
           -datadir=/root/.PACGlobal/ stop
 Restart=always
+RestartSec=20s
 PrivateTmp=true
-TimeoutStopSec=60s
-TimeoutStartSec=10s
+TimeoutStopSec=7200s
+TimeoutStartSec=30s
 StartLimitInterval=120s
 StartLimitBurst=5
 [Install]
@@ -205,7 +208,6 @@ echo ""
 sleep 60
 is_pac_running=`ps ax | grep -v grep | grep pacglobald | wc -l`
 if [ $is_pac_running -eq 0 ]; then
-	echo ""
 	echo "The daemon is not running or there is an issue, please restart the daemon!"
 	echo "Please check PAC FAQ on the PAC Global website for further information or help!"
 	echo ""
@@ -217,7 +219,7 @@ echo "Your masternode wallet on the server has been setup and will be ready when
 echo ""
 echo "Please execute following commands to check the status of your masternode:"
 echo "~/PACGlobal/pacglobal-cli -version"
+echo "~/PACGlobal/pacglobal-cli getblockcount"
 echo "~/PACGlobal/pacglobal-cli masternode status"
 echo "~/PACGlobal/pacglobal-cli mnsync status"
 echo ""
-
