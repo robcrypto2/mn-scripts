@@ -10,6 +10,8 @@ echo "#   Welcome to the chain clean-up script for PACGlobal masternodes   #"
 echo "######################################################################"
 echo ""
 echo "This script is to be ONLY used if the pacglobal-mn.sh script was used to install the PAC masternode version 0.14.x or newer and the masternode is still installed!"
+echo "Running this script on Ubuntu 18.04 LTS or newer is highly recommended."
+echo "Make sure you have enough memory and swap configured - their combined value should be at least 7 GB. Use the command 'free -h' to check the values (under 'Total')."
 echo ""
 if [ -e /root/.PACGlobal/pacglobal.conf ]; then
             sleep 1
@@ -19,13 +21,10 @@ if [ -e /root/.PACGlobal/pacglobal.conf ]; then
 		exit
             fi
 fi
-sleep 3
-echo ""
+sleep 10
 echo "###################################"
 echo "#  Updating the operating system  #"
 echo "###################################"
-echo ""
-echo "Running this script on Ubuntu 18.04 LTS or newer is highly recommended."
 echo ""
 sleep 3
 
@@ -34,11 +33,13 @@ sudo apt-get -y upgrade
 
 echo ""
 echo "Stopping the pacg service"
+set +e
+~/PACGlobal/pacglobal-cli stop
+set -e
 systemctl stop pacg.service
 echo "The pacg service stopped"
-sleep 3
-
 echo ""
+sleep 3
 echo "########################################"
 echo "#    Removing the current chain data   #"
 echo "########################################"
@@ -63,18 +64,18 @@ rm -r -f .PACGlobal/evodb/
 rm -r -f .PACGlobal/llmq/
 echo "Clean-up done!"
 echo ""
-#The three commands below should not be needed!
-cd .PACGlobal
-set +e
-wget -q https://github.com/PACGlobalOfficial/mn-scripts/blob/master/peers.dat?raw=true
-mv peers.dat?raw=true peers.dat
-set -e
+#The five commands below should not be needed!
+#cd ~/.PACGlobal
+#set +e
+#wget -q https://github.com/PACGlobalOfficial/mn-scripts/blob/master/peers.dat?raw=true
+#mv peers.dat?raw=true peers.dat
+#set -e
 sleep 3
 echo "Starting the pacg service"
 systemctl start pacg.service
 echo "The pacg service started"
-
 echo ""
+
 echo "###############################"
 echo "#      Running the wallet     #"
 echo "###############################"
@@ -97,6 +98,7 @@ echo "Your masternode / hot wallet has started rebuilding the local copy of bloc
 echo ""
 echo "Please execute following commands to check the status of your masternode:"
 echo "~/PACGlobal/pacglobal-cli -version"
+echo "~/PACGlobal/pacglobal-cli getblockcount"
 echo "~/PACGlobal/pacglobal-cli masternode status"
 echo "~/PACGlobal/pacglobal-cli mnsync status"
 echo ""
