@@ -56,7 +56,7 @@ echo "${bd}The current block the US explorer is on: ${nl}"$curr_us_expl
 echo "${bd}The current block the EU explorer is on: ${nl}"$curr_eu_expl
 echo ""
 wallet_version=$(~/PACGlobal/pacglobal-cli -version)
-echo "${bd}The masternode wallet version is: ${nl}"$walelt_version
+echo "${bd}The masternode wallet version is: ${nl}"$wallet_version
 echo ""
 echo "${bd}The script has ended!${nl}"
 echo ""
