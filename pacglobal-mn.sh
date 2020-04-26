@@ -80,7 +80,7 @@ if [ $cont = 'y' ] || [ $cont = 'yes' ] || [ $cont = 'Y' ] || [ $cont = 'Yes' ];
 		echo "###########################"
 		echo ""
 		sudo swapoff -a
-		sudo fallocate -l 1G /swapfile
+		sudo fallocate -l 2G /swapfile
 		sudo chmod 600 /swapfile
 		sudo mkswap /swapfile
 		sudo swapon /swapfile
@@ -163,6 +163,18 @@ echo "#----" >> pacglobal.conf
 echo "masternode=1" >> pacglobal.conf
 echo "masternodeblsprivkey=$mnkey" >> pacglobal.conf
 echo "externalip=$ipaddr" >> pacglobal.conf
+echo "#----" >> pacglobal.conf
+echo "addnode=64.44.52.218:7112" >> pacglobal.conf
+echo "addnode=116.202.10.83:7112" >> pacglobal.conf
+echo "addnode=164.68.107.75:7112" >> pacglobal.conf
+echo "addnode=45.63.50.110:7112" >> pacglobal.conf
+echo "addnode=195.201.143.113:7112" >> pacglobal.conf
+echo "addnode=116.203.59.191:7112" >> pacglobal.conf
+echo "addnode=66.42.81.197:7112" >> pacglobal.conf
+echo "addnode=159.69.157.249:7112" >> pacglobal.conf
+echo "addnode=116.202.19.232:7112" >> pacglobal.conf
+echo "addnode=116.203.71.190:7112" >> pacglobal.conf
+echo "addnode=155.138.216.20:7112" >> pacglobal.conf
 echo "#----" >> pacglobal.conf
 echo ""
 echo "#######################################"
